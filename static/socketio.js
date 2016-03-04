@@ -1,7 +1,6 @@
 $(document).ready(function(){
-    var ws  = io.connect("localhost:5000");
-    var name = "";
-
+    var name = prompt("Please enter a name");
+    var ws = io.connect("localhost:5000");
     var canvas = document.getElementById("drawcanvas");
     var context = canvas.getContext("2d");
     context.strokeStyle="black";
@@ -18,7 +17,8 @@ $(document).ready(function(){
     var isDrawing2 = false;
     var isDrawing = false;
     var drawer = false;
-    
+
+    ws.emit("clientMessage", {msg:""+name+" has connected.", nam:"Server"});
     ws.on("serverMessage", function(data){
 	$("#chat").append("<p>" + data.nam + ": " + data.msg + "</p>");
     });
@@ -69,9 +69,7 @@ $(document).ready(function(){
 	canvas.style.cursor="default";
 	isDrawing=false;
 	drawer = false;
-    
-    
-};
+    };
 
     var sendMsg = document.getElementById("sendMsg");
     sendMsg.addEventListener("click", sendMessage);
@@ -80,5 +78,9 @@ $(document).ready(function(){
     canvas.addEventListener("mousedown",drawing);
     canvas.addEventListener("mouseup",notDraw);
     canvas.addEventListener("mouseout",notDraw);
+
+    window.onunload = function leaving(){
+	ws.emit("clientMessage", {msg:""+name+" has disconnected.", nam:"Server"});
+    }
 });
 
